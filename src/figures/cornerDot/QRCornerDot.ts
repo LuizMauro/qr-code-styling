@@ -16,12 +16,13 @@ export default class QRCornerDot {
   }
 
   draw(x: number, y: number, size: number, rotation: number): void {
-    const type = this._type;
     let drawFunction;
-
-    switch (type) {
+    switch (this._type) {
       case cornerDotTypes.square:
         drawFunction = this._drawSquare;
+        break;
+      case cornerDotTypes.diamond:
+        drawFunction = this._drawDiamond;
         break;
       case cornerDotTypes.dot:
       default:
@@ -40,7 +41,7 @@ export default class QRCornerDot {
   }
 
   _basicDot(args: BasicFigureDrawArgs): void {
-    const { size, x, y } = args;
+    const { x, y, size } = args;
 
     this._rotateFigure({
       ...args,
@@ -54,7 +55,7 @@ export default class QRCornerDot {
   }
 
   _basicSquare(args: BasicFigureDrawArgs): void {
-    const { size, x, y } = args;
+    const { x, y, size } = args;
 
     this._rotateFigure({
       ...args,
@@ -74,5 +75,22 @@ export default class QRCornerDot {
 
   _drawSquare({ x, y, size, rotation }: DrawArgs): void {
     this._basicSquare({ x, y, size, rotation });
+  }
+
+  _drawDiamond({ x, y, size, rotation }: DrawArgs): void {
+    const { x: px, y: py, size: s } = { x, y, size };
+    this._rotateFigure({
+      x: px,
+      y: py,
+      size: s,
+      rotation,
+      draw: () => {
+        this._element = this._window.document.createElementNS("http://www.w3.org/2000/svg", "polygon");
+        const cx = px + s / 2;
+        const cy = py + s / 2;
+        const points = [`${cx},${py}`, `${px + s},${cy}`, `${cx},${py + s}`, `${px},${cy}`].join(" ");
+        this._element.setAttribute("points", points);
+      }
+    });
   }
 }

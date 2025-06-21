@@ -14,10 +14,8 @@ export default class QRDot {
   }
 
   draw(x: number, y: number, size: number, getNeighbor: GetNeighbor): void {
-    const type = this._type;
     let drawFunction;
-
-    switch (type) {
+    switch (this._type) {
       case dotTypes.dots:
         drawFunction = this._drawDot;
         break;
@@ -33,11 +31,13 @@ export default class QRDot {
       case dotTypes.extraRounded:
         drawFunction = this._drawExtraRounded;
         break;
+      case dotTypes.diamond:
+        drawFunction = this._drawDiamond;
+        break;
       case dotTypes.square:
       default:
         drawFunction = this._drawSquare;
     }
-
     drawFunction.call(this, { x, y, size, getNeighbor });
   }
 
@@ -163,6 +163,15 @@ export default class QRDot {
 
   _drawSquare({ x, y, size }: DrawArgs): void {
     this._basicSquare({ x, y, size, rotation: 0 });
+  }
+
+  _drawDiamond({ x, y, size }: DrawArgs): void {
+    // Diamond as a polygon: top, right, bottom, left points
+    this._element = this._window.document.createElementNS("http://www.w3.org/2000/svg", "polygon");
+    const cx = x + size / 2;
+    const cy = y + size / 2;
+    const points = [`${cx},${y}`, `${x + size},${cy}`, `${cx},${y + size}`, `${x},${cy}`].join(" ");
+    this._element.setAttribute("points", points);
   }
 
   _drawRounded({ x, y, size, getNeighbor }: DrawArgs): void {
